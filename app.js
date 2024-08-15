@@ -13,7 +13,8 @@ const app = express();
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
-app.use(bodyParser.urlencoded());// parsing our request data input
+app.use(bodyParser.urlencoded({extended: false}));// parsing our request data input
+app.use(express.static(path.join(__dirname, 'public'))); // setting up our public folder to be referred
 
 //We can define our middleware functions below here hence the "next" argument
 //Middleware basically is where we funnel our request through a bunch of functions before the response
