@@ -4,11 +4,21 @@ const express = require('express');
 const rootDir = require('../util/path');
 
 const router = express.Router();
+const adminData = require('./admin'); //accessing our shared admindata
 
 const shopRoutes = router.get('/', (req, res, next) => {
-    console.log('In the middleware');
+    console.log('In the shop middleware: ', {products: adminData.products});
+    const products = adminData.products;
 
-    res.sendFile(path.join(rootDir, 'views', 'shop.html')); // We call an absolute path but the path module builds it up for us
+    // We render a page with data 
+    res.render('shop', { 
+        prods: products,
+        pageTitle: 'Shop Home',
+        path: '/',
+        hasProducts: products.length > 0,
+        activeShop: true,
+        productCSS: true,
+    }) // We call an absolute path but the path module builds it up for us
 });
 
 module.exports = shopRoutes;

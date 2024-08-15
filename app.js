@@ -9,8 +9,12 @@ const rootDir = require('./util/path');
 
 const app = express(); 
 
+// View engines
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+
 // Custom imports
-const adminRoutes = require('./routes/admin');
+const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
 app.use(bodyParser.urlencoded({extended: false}));// parsing our request data input
@@ -21,11 +25,11 @@ app.use(express.static(path.join(__dirname, 'public'))); // setting up our publi
 
 // Routes
 // Note that there is some routes that have a prefix so that you dont have to add it on the routes file
-app.use('/admin', adminRoutes); // we call upon our admin routes so we can use it on our server;
+app.use('/admin', adminData.routes); // we call upon our admin routes so we can use it on our server;
 app.use(shopRoutes);
 
-app.use((req, res, next) => { // This will be a catch-all route
-    res.status(404).sendFile(path.join(rootDir, 'views', '404-page.html'));
-})
+app.use((req, res, next) => { // This will be a catch-all route if the page doesnt exist
+    res.status(404).render('404', {pageTitle: '404: Page Not Found'});
+});
 
 app.listen(3000)
