@@ -39,4 +39,4 @@ const requestHandler = (req,res) => {
     res.end();
 }
 
-exports = { requestHandler };
+module.exports = {requestHandler};
