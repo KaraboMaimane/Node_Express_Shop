@@ -29,6 +29,8 @@ app.use(express.static(path.join(__dirname, 'public'))); // setting up our publi
 app.use('/admin', adminRoutes); // we call upon our admin routes so we can use it on our server;
 app.use(shopRoutes);
 
+// app.use(errorController.get404);
 app.use(errorController.get404);
+
 
 app.listen(3000)
