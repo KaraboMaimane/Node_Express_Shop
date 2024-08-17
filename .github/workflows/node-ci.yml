@@ -27,4 +27,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
+    - run: curl https://api.render.com/deploy/srv-cr0e54dumphs7395oqh0?key=Npn6qCtUX9c
     # - run: npm run build --if-present
