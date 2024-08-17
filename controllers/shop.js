@@ -1,8 +1,9 @@
 const Product = require("../models/product"); // usually calling classes with the capital letter
+const Cart = require('../models/cart');
 
 exports.getProducts = (req, res, next) => {
   Product.fetchAll((products) => {
-    console.log("GET all products callback: ", { products: products });
+    console.log("shop controller > GET all products callback: ", { products: products });
     // We render a page with data
     res.render("shop/product-list", {
       prods: products,
@@ -12,9 +13,18 @@ exports.getProducts = (req, res, next) => {
   }); // We fetch the product data thats within the static method in the class hence we dont add 'new'
 };
 
+exports.getProduct = (req, res, next) => {
+  const {productId} = req.params;
+  console.log('callback')
+  Product.findById(productId, product => {
+    console.log('shop controller > GET single products callback', {productId, product});
+    res.render('shop/product-detail', {product, pageTitle: product.title, path: `/products`});
+  })
+}
+
 exports.getIndex = (req, res, next) => {
   Product.fetchAll((products) => {
-    console.log("GET all products callback: ", { products: products });
+    console.log("shop controller > GET all products callback: ", { products: products });
     // We render a page with data
     res.render("shop/index", {
       prods: products,
@@ -29,6 +39,20 @@ exports.getCart = (req, res, next) => {
     path: '/cart',
     pageTitle: 'Your Cart'
   })
+}
+
+exports.postCart = (req, res, next) => {
+  const {productId} = req.body;
+
+  // console.log('Shop controller > POST cart', {productId});
+
+  Product.findById(productId, (product) => {
+    console.log('Shop controller > POST cart > find by ID: ', {productId, product});
+
+    Cart.addProduct(productId, product.price);
+
+  });
+  res.redirect('/cart');
 }
 
 exports.getOrders = (req, res, next) => {
