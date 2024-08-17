@@ -4,13 +4,14 @@ exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Product Page",
     path: "/admin/add-product",
+    editing: false
   });
 };
 
 exports.postAddProduct = (req, res, next) => {
   console.log("Admin > POST add product: ", req.body);
   const { title, imageUrl, description, price } = req.body;
-  const product = new Product(title, imageUrl, description, price); // We instantiate the product class
+  const product = new Product(null, title, imageUrl, description, price); // We instantiate the product class
   product.save(); // Inside the class we save the product information
   res.redirect("/");
 };
@@ -45,6 +46,22 @@ exports.postEditProduct = (req, res, next) => {
   const updatedProduct = new Product(productId, title, imageUrl, description, price);
 
   updatedProduct.save();
+
+  res.redirect('/admin/products');
+}
+
+exports.postDeleteProduct = (req, res, next) => {
+  const {productId} = req.params;
+
+  console.log(req.params);
+
+  Product.deleteProductById(productId, (product) => {
+    console.log(`POST deleteProductById: ${productId}`, {product});
+
+    res.redirect('/admin/products');
+
+  });
+
 }
 
 exports.getProducts = (req, res, next) => {
