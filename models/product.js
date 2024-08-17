@@ -28,21 +28,33 @@ module.exports = class Product {
   }
 
   save() {
-    getProductsFromFile(products => {
+    getProductsFromFile((products) => {
+      // Fetch existing products from file asynchronously
+
       if (this.id) {
+        // Check if the product already has an id
+        // Update existing product
+
         const existingProductIndex = products.findIndex(
-          prod => prod.id === this.id
+          // Find the index of the product to update
+          (prod) => prod.id === this.id
         );
-        const updatedProducts = [...products];
-        updatedProducts[existingProductIndex] = this;
-        fs.writeFile(p, JSON.stringify(updatedProducts), err => {
-          console.log(err);
+        const updatedProducts = [...products]; // Create a copy of the products array
+        updatedProducts[existingProductIndex] = this; // Replace the existing product with the updated one
+
+        fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+          // Write the updated products back to the file
+          console.log(err); // Log any errors that occur during writing
         });
       } else {
-        this.id = Math.random().toString();
-        products.push(this);
-        fs.writeFile(p, JSON.stringify(products), err => {
-          console.log(err);
+        // Add new product
+
+        this.id = Math.random().toString(); // Generate a random id for the new product
+        products.push(this); // Add the new product to the array
+
+        fs.writeFile(p, JSON.stringify(products), (err) => {
+          // Write the updated products back to the file
+          console.log(err); // Log any errors that occur during writing
         });
       }
     });
