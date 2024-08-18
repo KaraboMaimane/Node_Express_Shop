@@ -2,47 +2,45 @@ const Product = require("../models/product"); // usually calling classes with th
 const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll((products) => {
-    console.log("shop controller > GET all products callback: ", {
-      products: products,
-    });
-    // We render a page with data
-    res.render("shop/product-list", {
-      prods: products,
-      pageTitle: "All Products",
-      path: "/products",
-    }); // We call an absolute path but the path module builds it up for us
-  }); // We fetch the product data thats within the static method in the class hence we dont add 'new'
+  // We fetch the product data thats within the static method in the class hence we dont add 'new'
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      // We render a page with data
+      res.render("shop/product-list", {
+        prods: rows,
+        pageTitle: "All Products",
+        path: "/products",
+      }); // We call an absolute path but the path module builds it up for us
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getProduct = (req, res, next) => {
   const { productId } = req.params;
   console.log("callback");
-  Product.findById(productId, (product) => {
-    console.log("shop controller > GET single products callback", {
-      productId,
-      product,
-    });
-    res.render("shop/product-detail", {
-      product,
-      pageTitle: product.title,
-      path: `/products`,
-    });
+  Product.findById(productId).then(([product]) => {
+res.render("shop/product-detail", {
+    product: product[0],
+    pageTitle: product[0].title,
+    path: `/products`,
   });
+  }).catch(err => console.log(err));
+
+  
 };
 
 exports.getIndex = (req, res, next) => {
-  Product.fetchAll((products) => {
-    console.log("shop controller > GET all products callback: ", {
-      products: products,
-    });
-    // We render a page with data
-    res.render("shop/index", {
-      prods: products,
-      pageTitle: "Shop Home",
-      path: "/",
-    }); // We call an absolute path but the path module builds it up for us
-  }); // We fetch the product data thats within the static method in the class hence we dont add 'new'
+  // We fetch the product data thats within the static method in the class hence we dont add 'new'
+  Product.fetchAll()
+    .then(([rows, fieldData]) => {
+      // We render a page with data
+      res.render("shop/index", {
+        prods: rows,
+        pageTitle: "Shop Home",
+        path: "/",
+      }); // We call an absolute path but the path module builds it up for us
+    })
+    .catch((err) => console.log(err));
 };
 
 exports.getCart = (req, res, next) => {
@@ -74,7 +72,7 @@ exports.postCart = (req, res, next) => {
       console.log("Shop controller > POST cart > find by ID: > Add product ", {
         productId,
         product,
-        updatedCart: cart
+        updatedCart: cart,
       });
 
       res.redirect("/cart");

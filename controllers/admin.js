@@ -12,8 +12,9 @@ exports.postAddProduct = (req, res, next) => {
   console.log("Admin > POST add product: ", req.body);
   const { title, imageUrl, description, price } = req.body;
   const product = new Product(null, title, imageUrl, description, price); // We instantiate the product class
-  product.save(); // Inside the class we save the product information
-  res.redirect("/");
+  product.save().then(() => {
+    res.redirect("/");
+  }).catch(err => console.log); // Inside the class we save the product information
 };
 
 exports.getEditProduct = (req, res, next) => {
