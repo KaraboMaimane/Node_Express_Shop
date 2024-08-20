@@ -1,4 +1,5 @@
 const Product = require("../models/product"); // usually calling classes with the capital letter
+
 exports.getAddProduct = (req, res, next) => {
   console.log("Admin > GET addProduct");
   res.render("admin/edit-product", {
@@ -9,19 +10,20 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log("Admin > POST add product: ", req.body);
-  const { title, imageUrl, description, price } = req.body;
+  const { title, price, description, imageUrl } = req.body;
+  const product = new Product(
+    title,
+    price,
+    description,
+    imageUrl,
+    null,
+    req.user._id
+  );
 
-  req.user
-    .createProduct({
-      // Sequelize function auto associates Product and User
-      title,
-      price,
-      imageUrl,
-      description,
-    })
+  product
+    .save()
     .then(() => {
-      console.log("Product created!");
+      console.log(`POST add product > success!`, { product });
       res.redirect("/admin/products");
     })
     .catch((err) => console.log(err));
@@ -38,12 +40,14 @@ exports.getEditProduct = (req, res, next) => {
 
   const { productId } = req.params;
 
-  req.user.getProducts({ where: { id: productId } })
-  // Product.findByPk(productId)
-    .then((products) => {
-      console.log("get edit product");
+  Product.findById(productId)
+    // Product.findByPk(productId)
+    .then((product) => {
+      console.log(
+        "🚀 Get edit Product ~ Find by id ~ .then ~ product:",
+        product
+      );
 
-      const product = products[0];
       if (!product) {
         return res.redirect("/");
       }
@@ -63,15 +67,10 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   const { productId, title, price, imageUrl, description } = req.body;
-  Product.findByPk(productId)
-    .then((product) => {
-      product.title = title;
-      product.price = price;
-      product.imageUrl = imageUrl;
-      product.description = description;
+  const product = new Product(title, price, description, imageUrl, productId);
 
-      return product.save();
-    })
+  product
+    .save()
     .then(() => {
       console.log("POST edit product > Updated result");
       res.redirect("/admin/products");
@@ -84,14 +83,10 @@ exports.postDeleteProduct = (req, res, next) => {
 
   console.log(req.params);
 
-  Product.findByPk(productId)
-    .then((product) => {
-      return product;
-    })
+  Product.deleteById(productId)
     .then((result) => {
-      console.log(`POST deleteProductById: ${result.id}`, { result });
-      result.destroy();
-      res.redirect("/");
+      console.log("🚀 ~ exports.postDeleteProduct ~ result:", result);
+      res.redirect("/admin/products");
     })
     .catch((err) => {
       console.log(err);
@@ -100,8 +95,7 @@ exports.postDeleteProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
   // We fetch the product data thats within the static method in the class hence we dont add 'new'
-  req.user.getProducts()
-  // Product.findAll()
+  Product.fetchAll()
     .then((products) => {
       console.log("Admin > GET all products callback: ", {
         products: products,

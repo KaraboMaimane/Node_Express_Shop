@@ -6,14 +6,8 @@ const bodyParser = require("body-parser");
 
 // Custom Imports
 const errorController = require("./controllers/notFound");
-const sequelize = require("./util/database");
-
-const Product = require("./models/product");
-const User = require("./models/user");
-const Cart = require("./models/cart");
-const CartItem = require("./models/cart-item");
-const Order = require("./models/order");
-const OrderItem = require("./models/order-item");
+const mongoConnect = require('./util/database').mongoConnect;
+const User = require('./models/user')
 
 const app = express();
 
@@ -34,9 +28,10 @@ app.use(express.static(path.join(__dirname, "public"))); // setting up our publi
 // we register this only not run it. It will only run when the database cod e has been initialized
 // It gets fired off as a middleware function associating a User with products etc.
 app.use((req, res, next) => {
-  User.findByPk(1)
+  User.findById('66c3fee74b3429972a0ec372')
     .then((user) => {
-      req.user = user;
+      console.log(user);
+      req.user = new User(user.name, user.email, user.cart, user._id);
       next();
     })
     .catch((err) => {
@@ -53,42 +48,14 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 // DB Associations
-Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
-User.hasMany(Product);
-User.hasOne(Cart);
-Cart.belongsTo(User);
-Cart.belongsToMany(Product, {through: CartItem});
-Product.belongsToMany(Cart, {through: CartItem});
-Order.belongsTo(User);
-User.hasMany(Order);
-Order.belongsToMany(Product, {through: OrderItem});
+
 
 const PORT = process.env.PORT || 3000; // Setting up the deployment port
 
-sequelize
-    // .sync({ force: true }) // This method basically forces changes to happen in the database clearing existing fields
-  .sync()
-  .then((result) => {
-    return User.findByPk(1);
-    // console.log('result');
-  })
-  .then((user) => {
-    if (!user) {
-      return User.create({
-        name: "Karabo Maimane",
-        email: "maimane23@hotmail.com",
-      });
-    }
-    return user;
-  })
-  .then((user) => {
-    // console.log('current logged in user: ', {user});
-    return user.createCart();
-  }).then((cart) => {
-    // console.log('Cart data: ', {cart});
+mongoConnect().then((result) => {
+  console.log("🚀 mongoConnect ~ result ~ success!!!")
+  app.listen(PORT, (() => {
+    console.log(`🚀 Node.js server is live on port: ${PORT}`);
+  }));
+}).catch(err => console.error(err));
 
-    app.listen(PORT);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
