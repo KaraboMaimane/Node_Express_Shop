@@ -1,95 +1,62 @@
-const products = [];
-const fs = require("fs");
-const path = require("path");
-const Cart = require('./cart')
-
-const p = path.join(
-  path.dirname(require.main.filename),
-  "data",
-  "products.json"
-);
-
-const getProductsFromFile = (cb) => {
-  fs.readFile(p, (err, fileContent) => {
-    if (err) {
-      return cb([]);
-    }
-    cb(JSON.parse(fileContent));
-  });
-  return products;
-};
-
-module.exports = class Product {
-  constructor(id, title, imageUrl, description, price) {
-    this.id = id;
+const mongoDb = require("mongodb");
+const getDb = require("../util/database").getDb;
+const productsCollection = "products";
+class Product {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
     this.price = price;
+    this.description = description;
+    this.imageUrl = imageUrl;
+    this._id = id ? new mongoDb.ObjectId(id) : null;
+    this.userId = userId;
   }
 
   save() {
-    getProductsFromFile((products) => {
-      // Fetch existing products from file asynchronously
-
-      if (this.id) {
-        // Check if the product already has an id
-        // Update existing product
-
-        const existingProductIndex = products.findIndex(
-          // Find the index of the product to update
-          (prod) => prod.id === this.id
-        );
-        const updatedProducts = [...products]; // Create a copy of the products array
-        updatedProducts[existingProductIndex] = this; // Replace the existing product with the updated one
-
-        fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
-          // Write the updated products back to the file
-          console.log(err); // Log any errors that occur during writing
-        });
-      } else {
-        // Add new product
-
-        this.id = Math.random().toString(); // Generate a random id for the new product
-        products.push(this); // Add the new product to the array
-
-        fs.writeFile(p, JSON.stringify(products), (err) => {
-          // Write the updated products back to the file
-          console.log(err); // Log any errors that occur during writing
-        });
-      }
+    const db = getDb();
+    let dbOp;
+    if (this._id) {
+      dbOp = db
+        .collection(productsCollection)
+        .updateOne({ _id: new mongoDb.ObjectId(this._id) }, { $set: this });
+    } else {
+      dbOp = db.collection(productsCollection).insertOne(this);
+    }
+    return dbOp.then((result) => {
+      console.log(result);
     });
   }
 
-  // static makes us call the function on the class directly without instatiating it
-  static fetchAll(cb) {
-    getProductsFromFile(cb);
+  static fetchAll() {
+    const db = getDb();
+    return db
+      .collection(productsCollection)
+      .find()
+      .toArray()
+      .then((products) => {
+        // console.log("🚀 ~ Product ~ fetchAll ~ products", products > 0);
+        return products;
+      })
+      .catch((err) => console.log(err));
   }
 
-  static findById(id, cb) {
-    getProductsFromFile((products) => {
-      const product = products.find((p) => p.id === id);
-      cb(product);
-    });
+  static findById(productId) {
+    const db = getDb();
+
+    return db
+      .collection(productsCollection)
+      .find({ _id: new mongoDb.ObjectId(productId) })
+      .next()
+      .then((product) => {
+        // console.log(`🚀 ~ Product ~ returndb.collection ~ product: ${productId} successful!!`);
+        return product;
+      })
+      .catch((err) => console.error(err));
   }
 
-  static deleteProductById(id, cb) {
-    getProductsFromFile((products) => {
-      const {price} = products.find(prod => prod.id === id);
-      const updatedProducts = products.filter((p) => p.id !== id);
-
-      cb(updatedProducts);
-
-      // console.log(`Product class > delete product: ${id} result`, {updatedProducts});
-
-      fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
-        // Write the updated products back to the file
-        console.log(err); // Log any errors that occur during writing
-
-        if(!err){
-          Cart.deleteProduct(id,price)
-        }
-      });
-    });
+  static async deleteById(productId){
+    const db = getDb();
+    return await db.collection('products').deleteOne({_id: new mongoDb.ObjectId(productId)});
   }
-};
+}
+
+module.exports = Product;
