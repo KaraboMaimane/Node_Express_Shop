@@ -11,19 +11,18 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, price, description, imageUrl } = req.body;
-  const product = new Product(
+  const product = new Product({
     title,
     price,
     description,
     imageUrl,
-    null,
-    req.user._id
-  );
+    userId: req.user, // Setting the relation
+  });
 
   product
     .save()
-    .then(() => {
-      console.log(`POST add product > success!`, { product });
+    .then((result) => {
+      console.log("🚀 POST add Product ~ .then ~ result:", result);
       res.redirect("/admin/products");
     })
     .catch((err) => console.log(err));
@@ -32,8 +31,6 @@ exports.postAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
 
-  console.log("get edit product");
-
   if (!editMode) {
     return res.redirect("/");
   }
@@ -41,7 +38,6 @@ exports.getEditProduct = (req, res, next) => {
   const { productId } = req.params;
 
   Product.findById(productId)
-    // Product.findByPk(productId)
     .then((product) => {
       console.log(
         "🚀 Get edit Product ~ Find by id ~ .then ~ product:",
@@ -67,15 +63,20 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   const { productId, title, price, imageUrl, description } = req.body;
-  const product = new Product(title, price, description, imageUrl, productId);
 
-  product
-    .save()
-    .then(() => {
-      console.log("POST edit product > Updated result");
-      res.redirect("/admin/products");
+  Product.findById(productId)
+    .then((product) => {
+      product.title = title;
+      product.price = price;
+      product.imageUrl = imageUrl;
+      product.description = description;
+
+      return product.save();
     })
-    .catch((err) => console.log(err));
+    .then((result) => {
+      // console.log("🚀 POST edit product ~ Product.findById ~ result:", result);
+      res.redirect("/admin/products");
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -83,9 +84,9 @@ exports.postDeleteProduct = (req, res, next) => {
 
   console.log(req.params);
 
-  Product.deleteById(productId)
+  Product.findByIdAndDelete(productId)
     .then((result) => {
-      console.log("🚀 ~ exports.postDeleteProduct ~ result:", result);
+      // console.log("🚀 ~ exports.postDeleteProduct ~ result:", result);
       res.redirect("/admin/products");
     })
     .catch((err) => {
@@ -95,7 +96,9 @@ exports.postDeleteProduct = (req, res, next) => {
 
 exports.getProducts = (req, res, next) => {
   // We fetch the product data thats within the static method in the class hence we dont add 'new'
-  Product.fetchAll()
+  Product.find()
+    // .select("title price -_id") // fields to include
+    // .populate("userId")
     .then((products) => {
       console.log("Admin > GET all products callback: ", {
         products: products,

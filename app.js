@@ -1,15 +1,18 @@
+require('dotenv').config();
 // Node imports
 const express = require("express");
 const path = require("path");
 
 const bodyParser = require("body-parser");
+const mongoose = require('mongoose');
 
 // Custom Imports
 const errorController = require("./controllers/notFound");
-const mongoConnect = require('./util/database').mongoConnect;
-const User = require('./models/user')
+const User = require('./models/user');
 
 const app = express();
+
+const PORT = process.env.PORT || 3000;
 
 // View engines
 app.set("view engine", "ejs");
@@ -28,10 +31,10 @@ app.use(express.static(path.join(__dirname, "public"))); // setting up our publi
 // we register this only not run it. It will only run when the database cod e has been initialized
 // It gets fired off as a middleware function associating a User with products etc.
 app.use((req, res, next) => {
-  User.findById('66c3fee74b3429972a0ec372')
+  User.findById('66c66f8840dc5ca07c71eb67')
     .then((user) => {
       console.log(user);
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch((err) => {
@@ -47,18 +50,28 @@ app.use(shopRoutes);
 // app.use(errorController.get404);
 app.use(errorController.get404);
 
-// DB Associations
+const connectionString =  process.env.MongoDBConnectionString;
+mongoose.connect(connectionString).then((result) => {
+  User.findOne().then(user => {
+    
+    if(!user){
+      const user = new User({
+        name: 'Karabo Maimane',
+        email: 'maimane23@hotmail.com',
+        cart: {
+          items: []
+        }
+      })
+    
+      console.log("🚀 ~ User.findOne ~ user:", user)
+      user.save();
+    }
+  })
 
-
-const PORT = process.env.PORT || 3000; // Setting up the deployment port
-
-mongoConnect().then((result) => {
-  console.log("🚀 mongoConnect ~ result ~ success!!!")
-  app.listen(PORT, (() => {
-    console.log(`🚀 Node.js server is live on port: ${PORT}`);
-  }));
-}).catch(err => console.error(err));
-
-
-const port = process.env.PORT || 3000
-app.listen(port);
+  // console.log("🚀 ~ mongoose.connect ~ success")
+  console.log("🚀 Server is Live on Port:", PORT);
+  
+  app.listen(PORT);
+}).catch(err => {
+  console.log("🚀 ~ mongoose.connect ~ err:", err)
+})
