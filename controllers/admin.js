@@ -6,6 +6,7 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product Page",
     path: "/admin/add-product",
     editing: false,
+    isAuthenticated: req.session.isLoggedIn
   });
 };
 
@@ -17,12 +18,14 @@ exports.postAddProduct = (req, res, next) => {
     description,
     imageUrl,
     userId: req.user, // Setting the relation
+    isAuthenticated: req.session.isLoggedIn
+
   });
 
   product
     .save()
     .then((result) => {
-      console.log("🚀 POST add Product ~ .then ~ result:", result);
+      // console.log("🚀 POST add Product ~ .then ~ result:", result);
       res.redirect("/admin/products");
     })
     .catch((err) => console.log(err));
@@ -40,22 +43,24 @@ exports.getEditProduct = (req, res, next) => {
   Product.findById(productId)
     .then((product) => {
       console.log(
-        "🚀 Get edit Product ~ Find by id ~ .then ~ product:",
+        // "🚀 Get edit Product ~ Find by id ~ .then ~ product:",
         product
       );
 
       if (!product) {
         return res.redirect("/");
       }
-      console.log(`Admin > GET editProduct > Product find by id ${productId}`, {
-        product,
-      });
+      // console.log(`Admin > GET editProduct > Product find by id ${productId}`, {
+      //   product,
+      // });
 
       res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/edit-product",
         editing: editMode,
         product,
+        isAuthenticated: req.session.isLoggedIn
+
       });
     })
     .catch((err) => console.log(err));
@@ -108,6 +113,8 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
+        isAuthenticated: req.session.isLoggedIn
+
       }); // We call an absolute path but the path module builds it up for us
     })
     .catch((err) => console.log(err));

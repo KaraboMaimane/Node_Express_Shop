@@ -14,7 +14,7 @@
         <h2>R <%= product.price %></h2>
         <p><%= product.description %></p>
 
-        <%- include('../includes/add-to-cart.ejs', {product}) %>
+        <%- include('../includes/add-to-cart.ejs', {product, isAuthenticated}) %>
     </main>
     
 <%- include('../includes/end.ejs') %>
