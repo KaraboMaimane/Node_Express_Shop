@@ -18,7 +18,7 @@ const app = express();
 
 // Session storage module setup
 const store = new MongoDBStore({
-  uri: process.env.MongoDBConnectionString,
+  uri: process.env.MONGODB_CONNECTION_STRING,
   collection: 'sessions'
 });
 
@@ -65,7 +65,7 @@ app.use(authRoutes);
 // app.use(errorController.get404);
 app.use(errorController.get404);
 
-const connectionString =  process.env.MongoDBConnectionString;
+const connectionString =  process.env.MONGODB_CONNECTION_STRING;
 mongoose.connect(connectionString).then((result) => {
   User.findOne().then(user => {
     
