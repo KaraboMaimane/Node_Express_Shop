@@ -12,6 +12,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 
 // Custom Imports
 const errorController = require("./controllers/notFound");
+
+const bcrypt = require('bcryptjs');
+
 const User = require('./models/user');
 
 const app = express();
@@ -67,21 +70,6 @@ app.use(errorController.get404);
 
 const connectionString =  process.env.MONGODB_CONNECTION_STRING;
 mongoose.connect(connectionString).then((result) => {
-  User.findOne().then(user => {
-    
-    if(!user){
-      const user = new User({
-        name: 'Karabo Maimane',
-        email: 'maimane23@hotmail.com',
-        cart: {
-          items: []
-        }
-      })
-    
-      // console.log("🚀 ~ User.findOne ~ user:", user)
-      user.save();
-    }
-  })
 
   // console.log("🚀 ~ mongoose.connect ~ success")
   console.log("🚀 Server is Live on Port:", PORT);
