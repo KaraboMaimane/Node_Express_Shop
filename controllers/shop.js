@@ -42,10 +42,7 @@ exports.getIndex = (req, res, next) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop Home",
-        path: "/",
-        isAuthenticated: req.session.isLoggedIn
-
-        
+        path: "/"
       });
       
     })
