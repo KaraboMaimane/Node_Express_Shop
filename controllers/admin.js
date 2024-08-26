@@ -5,8 +5,6 @@ exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
     pageTitle: "Add Product Page",
     path: "/admin/add-product",
-    editing: false,
-    isAuthenticated: req.session.isLoggedIn
   });
 };
 
@@ -18,8 +16,6 @@ exports.postAddProduct = (req, res, next) => {
     description,
     imageUrl,
     userId: req.user, // Setting the relation
-    isAuthenticated: req.session.isLoggedIn
-
   });
 
   product
@@ -59,8 +55,6 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editing: editMode,
         product,
-        isAuthenticated: req.session.isLoggedIn
-
       });
     })
     .catch((err) => console.log(err));
@@ -112,9 +106,7 @@ exports.getProducts = (req, res, next) => {
       res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
-        path: "/admin/products",
-        isAuthenticated: req.session.isLoggedIn
-
+        path: "/admin/products"
       }); // We call an absolute path but the path module builds it up for us
     })
     .catch((err) => console.log(err));

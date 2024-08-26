@@ -10,8 +10,6 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
-        isAuthenticated: req.session.isLoggedIn
-
       }); // We call an absolute path but the path module builds it up for us
     })
     .catch((err) => {
@@ -27,8 +25,6 @@ exports.getProduct = (req, res, next) => {
         product: product,
         pageTitle: product.title,
         path: `/products`,
-        isAuthenticated: req.session.isLoggedIn
-
       });
     })
     .catch((err) => console.log(err));
@@ -42,9 +38,8 @@ exports.getIndex = (req, res, next) => {
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop Home",
-        path: "/"
+        path: "/",
       });
-      
     })
     .catch((err) => {
       console.log(err);
@@ -65,7 +60,6 @@ exports.getCart = (req, res, next) => {
         path: "/cart",
         pageTitle: "Your Cart",
         products: products,
-        isAuthenticated: req.session.isLoggedIn
       });
     })
     .catch((err) => {
@@ -128,16 +122,14 @@ exports.postOrder = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  console.log(req.user)
-  Order.find({'user.userId': req.user._id})
+  console.log(req.user);
+  Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       // console.log('orders', orders);
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
         orders: orders,
-        isAuthenticated: req.session.isLoggedIn
-
       });
     })
     .catch((err) => console.log(err));

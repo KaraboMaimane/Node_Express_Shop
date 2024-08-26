@@ -5,13 +5,16 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 
 exports.getLogin = (req, res, next) => {
-  console.log("Auth > GET login");
-  console.log(req.session.isLoggedIn);
+  let message = req.flash("error");
+
+  message = message.length > 0 ? message[0] : null;
+
+  // console.log("Auth > GET login");
+  // console.log(req.session.isLoggedIn);
   res.render("auth/login", {
     pageTitle: "Login Page",
     path: "/login",
-    editing: true,
-    isAuthenticated: req.session.isLoggedIn,
+    errorMessage: message, // takes the error key being passed through
   });
 };
 
@@ -20,6 +23,7 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email: email })
     .then((userResult) => {
       if (!userResult) {
+        req.flash("error", "Invalid email or password.");
         return res.redirect("/login");
       }
       // We then compare the hashed values against the record in the database;
@@ -36,6 +40,8 @@ exports.postLogin = (req, res, next) => {
               res.redirect("/");
             });
           }
+
+          req.flash("error", "Invalid email or password.");
           res.redirect("/login");
         })
         .catch((err) => {
@@ -45,7 +51,7 @@ exports.postLogin = (req, res, next) => {
     })
     .catch((err) => {
       console.log(err);
-    })
+    });
 };
 
 exports.postLogout = (req, res, next) => {
@@ -56,12 +62,16 @@ exports.postLogout = (req, res, next) => {
 };
 
 exports.getSignup = (req, res, next) => {
+  let message = req.flash("error");
+
+  message = message.length > 0 ? message[0] : null;
+
   console.log("Auth > GET signup");
   console.log(req.session.isLoggedIn);
   res.render("auth/signup", {
     pageTitle: "Signup Page",
     path: "/signup",
-    isAuthenticated: false,
+    errorMessage: message
   });
 };
 
@@ -72,6 +82,7 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: email })
     .then((userDoc) => {
       if (userDoc) {
+        req.flash("error", "Email already exists.");
         return res.redirect("/signup");
       }
 

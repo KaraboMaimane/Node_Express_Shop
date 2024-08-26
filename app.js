@@ -11,6 +11,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const csrf = require('csurf');
+const flash = require('connect-flash')
 
 // Custom Imports
 const errorController = require("./controllers/notFound");
@@ -47,6 +48,7 @@ app.use(bodyParser.urlencoded({ extended: false })); // parsing our request data
 app.use(express.static(path.join(__dirname, "public"))); // setting up our public folder to be referred
 app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, store: store})); // Enable conneciton to a mongoDb session
 app.use(csrfProtection);
+app.use(flash());
 
 // We set up our middleware to handle our session data persisted in the database
 app.use((req, res, next) => {
@@ -68,7 +70,7 @@ app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   next();
 
-  console.log({locals: res.locals});
+  // console.log({locals: res.locals});?
 })
 
 // Routes
