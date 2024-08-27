@@ -11,7 +11,7 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const csrf = require('csurf');
-const flash = require('connect-flash')
+const flash = require('connect-flash');
 
 // Custom Imports
 const errorController = require("./controllers/notFound");
@@ -87,7 +87,7 @@ mongoose.connect(connectionString).then((result) => {
 
   // console.log("🚀 ~ mongoose.connect ~ success")
   console.log("🚀 Server is Live on Port:", PORT);
-  
+
   app.listen(PORT);
 }).catch(err => {
   console.log("🚀 ~ mongoose.connect ~ err:", err)

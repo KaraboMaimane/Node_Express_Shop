@@ -250,6 +250,10 @@ form {
 
 }
 
+.product-detail-image{
+  height: 20rem;
+}
+
 @media (min-width: 768px) {
   .main-header__nav {
     display: flex;
