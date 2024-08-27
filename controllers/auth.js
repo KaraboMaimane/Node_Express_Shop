@@ -1,8 +1,20 @@
 // Node Imports
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 
 // Custom Imports
 const User = require("../models/user");
+const transporter = nodemailer.createTransport({
+  host: process.env.SES_SMTP_ENDPOINT,
+  port: 587,
+  auth: {
+    user: process.env.SMTP_USERNAME,
+    pass: process.env.SMTP_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false, // Only use this option if you experience TLS-related issues
+  },
+});
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
@@ -71,7 +83,7 @@ exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
     pageTitle: "Signup Page",
     path: "/signup",
-    errorMessage: message
+    errorMessage: message,
   });
 };
 
@@ -86,20 +98,35 @@ exports.postSignup = (req, res, next) => {
         return res.redirect("/signup");
       }
 
-      return bcrypt.hash(password, 12).then((passwordHashResult) => {
-        //Initialize a new user
-        const user = new User({
-          email: email,
-          password: passwordHashResult,
-          cart: { items: [] },
+      return bcrypt
+        .hash(password, 12)
+        .then((passwordHashResult) => {
+          //Initialize a new user
+          const user = new User({
+            email: email,
+            password: passwordHashResult,
+            cart: { items: [] },
+          });
+
+          return user.save().then(result => {
+            return transporter
+            .sendMail({
+              to: process.env.SMTP_DEFAULT_EMAIL,
+              // to: email,
+              from: "mailtrap@demomailtrap.com",
+              subject: "Signup Success!",
+              html: `<h1>${email} has successfully signed up to the Node Shop!!!</h1>`,
+            })
+          });
+          
+        })
+        .catch((err) => {
+          console.log("Nodemailer Error: ", err);
         });
-        return user.save();
-      });
     })
     .catch((err) => {
       console.log(err);
     })
-
     .then((result) => {
       res.redirect("/login");
     })
